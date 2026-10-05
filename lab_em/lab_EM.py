@@ -5,10 +5,17 @@ import numpy as np
 radius = pd.read_csv("em_beam_radius.csv")
 field = pd.read_csv("em_magnetic_field.csv")
 
+N_TURNS = 130
+R_RADIUS = 0.155 # meters
+
+# compute electron path radius in meters
 radius["r_m"] = (radius["right_reading_cm"] - radius["left_reading_cm"]) / 100 / 2
+# compute the mean of the radius for 3 trials and square
 mean_r = radius.groupby(['coil_current_A', 'gun_voltage_V'])['r_m'].mean().reset_index()
 mean_r["r2"] = mean_r["r_m"] ** 2
-mean_r["B"] = (4/5)**(3/2) * mean_r['coil_current_A'] * 130 * (1/0.155) * mu_0
+# compute magnetic field from intensity and constants
+mean_r["B"] = (4/5)**(3/2) * mean_r['coil_current_A'] * N_TURNS * (1/R_RADIUS) * mu_0
+# linear fit
 results = []
 for I, g in mean_r.groupby("coil_current_A"):
     a, b = np.polyfit(g["r2"], g["gun_voltage_V"], 1) 
