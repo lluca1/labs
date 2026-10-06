@@ -69,10 +69,11 @@ for I, g in mean_r.groupby("coil_current_A"):
                  fmt="o", capsize=2, markersize=1, label=f"I = {I} A")
     plt.plot(x, a * x + b)                              
 
+# add labels and save plot
 plt.xlabel(r"$r^2$ (m$^2$)")
 plt.ylabel(r"$V_a$ (V)")
 plt.legend()
-plt.show()
+plt.savefig("em_plot.png")
 
 # convert results to a DataFrame
 results = pd.DataFrame(results)
