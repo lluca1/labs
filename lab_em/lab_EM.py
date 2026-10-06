@@ -23,7 +23,7 @@ SIG_V = 0.5              # V, half a div
 SIG_I = 0.005            # A, half a div
 SIG_B_READ = 0.005e-3   # T, half a div
 
-# --- derived uncertainties ---
+# derived uncertainties 
 SIG_R_COIL = np.sqrt(4 * SIG_READ_COIL**2) / 4        # m, = 0.00025  (4 readings, divide by 2 because theyre averaged, divide by 2 because radius is half the diameter)
 SIG_R_BEAM = np.sqrt(2 * SIG_READ_BEAM**2) / 2        # m, = 0.00071  (2 readings, divide by 2 because radius is half the diameter)
 
@@ -49,13 +49,16 @@ mean_r["sig_helmholtz_field_B_T"] = mean_r["helmholtz_field_B_T"] * np.sqrt((SIG
 # linear fit
 results = []
 for I, g in mean_r.groupby("coil_current_A"):
+    
     # 1st degree linear fit over radius squared and launch voltage
     fit = linregress(g["r2"], g["gun_voltage_V"])
     a, b = fit.slope, fit.intercept
     sig_a, sig_b = fit.stderr, fit.intercept_stderr
+    
     # grab magnetic field and its error for this current
     B = g["helmholtz_field_B_T"].iloc[0]
     sig_B = g["sig_helmholtz_field_B_T"].iloc[0]
+    
     # save the results for every value
     results.append({"I": I, "slope": a, "sig_slope": sig_a,
                     "intercept": b, "sig_intercept": sig_b,
