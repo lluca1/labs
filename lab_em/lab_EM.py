@@ -97,3 +97,14 @@ results["sig_B_meas"] = np.where(B_sem > SIG_B_READ, B_sem, SIG_B_READ)
 results["em_meas"] = 2 * results["slope"] / results["B_meas"]**2
 results["sig_em_meas"] = results["em_meas"] * np.sqrt((results["sig_slope"] / results["slope"])**2
                                                       + (2 * results["sig_B_meas"] / results["B_meas"])**2)
+
+# save the data to a text file
+tables = [("beam readings and radius", radius),
+          ("mean radius, r^2 and field per (I, V) point", mean_r),
+          ("magnetic field readings", field),
+          ("measured field per current", B_stats.reset_index()),
+          ("fit results and e/m per current", results)]
+
+with open("em_results.txt", "w") as f:
+    for name, table in tables:
+        f.write(f"--- {name} ---\n{table.to_string(index=False)}\n\n")
