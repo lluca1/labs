@@ -90,7 +90,7 @@ plt.grid(color="#e1e0d9", linewidth=0.8)
 plt.gca().set_axisbelow(True)
 plt.gca().spines[["top", "right"]].set_visible(False)
 plt.legend(frameon=False)
-plt.savefig("em_plot.png", dpi=300)
+plt.savefig("em_plot.png", dpi=300, bbox_inches="tight")
 
 # convert results to a DataFrame
 results = pd.DataFrame(results)
