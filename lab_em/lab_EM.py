@@ -46,9 +46,13 @@ mean_r["sig_r2"] = 2 * mean_r["r_m"] * mean_r["sig_r"] # derivative of r^2 = 2 *
 mean_r["helmholtz_field_B_T"] = (4/5)**(3/2) * mean_r['coil_current_A'] * N_TURNS * (1/R_RADIUS) * mu_0
 mean_r["sig_helmholtz_field_B_T"] = mean_r["helmholtz_field_B_T"] * np.sqrt((SIG_I / mean_r["coil_current_A"])**2 + (SIG_R_COIL / R_RADIUS)**2) # manual formula, square root of sum of squares of relative errors
 
+# plot colors and marker shapes, one per coil current
+COLORS = ["#2a78d6", "#eb6834", "#1baf7a"]
+MARKERS = ["o", "s", "^"]
+
 # linear fit
 results = []
-for I, g in mean_r.groupby("coil_current_A"):
+for i, (I, g) in enumerate(mean_r.groupby("coil_current_A")):
     
     # 1st degree linear fit of radius squared (measured) over launch voltage (set)
     fit = linregress(g["gun_voltage_V"], g["r2"])
@@ -74,14 +78,19 @@ for I, g in mean_r.groupby("coil_current_A"):
     x = np.linspace(0, g["gun_voltage_V"].max(), 2)
     # plot the graph
     plt.errorbar(g["gun_voltage_V"], g["r2"], xerr=SIG_V, yerr=g["sig_r2"],
-                 fmt="o", capsize=2, markersize=1, label=f"I = {I} A")
-    plt.plot(x, a * x + b)                              
+                 fmt=MARKERS[i], color=COLORS[i], capsize=2, markersize=3,
+                 elinewidth=1, label=f"I = {I} A")
+    # fit line in the same color as its points
+    plt.plot(x, a * x + b, color=COLORS[i], linewidth=1.5)
 
 # add labels and save plot
 plt.xlabel(r"$V_a$ (V)")
 plt.ylabel(r"$r^2$ (m$^2$)")
-plt.legend()
-plt.savefig("em_plot.png")
+plt.grid(color="#e1e0d9", linewidth=0.8)
+plt.gca().set_axisbelow(True)
+plt.gca().spines[["top", "right"]].set_visible(False)
+plt.legend(frameon=False)
+plt.savefig("em_plot.png", dpi=300)
 
 # convert results to a DataFrame
 results = pd.DataFrame(results)
