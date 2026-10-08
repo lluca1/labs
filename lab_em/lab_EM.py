@@ -50,10 +50,14 @@ mean_r["sig_helmholtz_field_B_T"] = mean_r["helmholtz_field_B_T"] * np.sqrt((SIG
 results = []
 for I, g in mean_r.groupby("coil_current_A"):
     
-    # 1st degree linear fit over radius squared and launch voltage
-    fit = linregress(g["r2"], g["gun_voltage_V"])
+    # 1st degree linear fit of radius squared (measured) over launch voltage (set)
+    fit = linregress(g["gun_voltage_V"], g["r2"])
     a, b = fit.slope, fit.intercept
     sig_a, sig_b = fit.stderr, fit.intercept_stderr
+    
+    # chi squared, 2 fitted parameters so N - 2 degrees of freedom
+    chi2 = np.sum(((g["r2"] - (a * g["gun_voltage_V"] + b)) / g["sig_r2"])**2)
+    dof = len(g) - 2
     
     # grab magnetic field and its error for this current
     B = g["helmholtz_field_B_T"].iloc[0]
@@ -62,19 +66,20 @@ for I, g in mean_r.groupby("coil_current_A"):
     # save the results for every value
     results.append({"I": I, "slope": a, "sig_slope": sig_a,
                     "intercept": b, "sig_intercept": sig_b,
+                    "chi2": chi2, "dof": dof,
                     "B": B, "sig_B": sig_B,
-                    "em": 2 * a / B**2})
+                    "em": 2 / (a * B**2)})
     
     # create values to plot the line between
-    x = np.linspace(0, g["r2"].max(), 2)
+    x = np.linspace(0, g["gun_voltage_V"].max(), 2)
     # plot the graph
-    plt.errorbar(g["r2"], g["gun_voltage_V"], xerr=g["sig_r2"], yerr=SIG_V,
+    plt.errorbar(g["gun_voltage_V"], g["r2"], xerr=SIG_V, yerr=g["sig_r2"],
                  fmt="o", capsize=2, markersize=1, label=f"I = {I} A")
     plt.plot(x, a * x + b)                              
 
 # add labels and save plot
-plt.xlabel(r"$r^2$ (m$^2$)")
-plt.ylabel(r"$V_a$ (V)")
+plt.xlabel(r"$V_a$ (V)")
+plt.ylabel(r"$r^2$ (m$^2$)")
 plt.legend()
 plt.savefig("em_plot.png")
 
@@ -98,7 +103,7 @@ results["B_meas"] = B_stats["mean"].values
 results["sig_B_meas"] = np.where(B_sem > SIG_B_READ, B_sem, SIG_B_READ)
 
 # e/m with the measured field, same slopes and same propagation formula
-results["em_meas"] = 2 * results["slope"] / results["B_meas"]**2
+results["em_meas"] = 2 / (results["slope"] * results["B_meas"]**2)
 results["sig_em_meas"] = results["em_meas"] * np.sqrt((results["sig_slope"] / results["slope"])**2
                                                       + (2 * results["sig_B_meas"] / results["B_meas"])**2)
 
