@@ -38,7 +38,18 @@ plt.plot(f_line, fit.slope * f_line + fit.intercept, label="least-squares fit")
 plt.xlabel("Frequency $f$ (Hz)")
 plt.ylabel(r"Stopping voltage $|V_\mathrm{stop}|$ (V)")
 plt.legend()
-plt.show()
+plt.savefig("assignment1_stopping_voltage.png", dpi=300, bbox_inches="tight")
+plt.close()
 
 a2 = pd.read_csv("assignment2_IV_curves.csv")
 a2["dI_A"] = 0.1 * 10.0 ** a2["I_range_exp"]   # xx.x format on display, with varying resolutions
+
+for d, g in a2.groupby("diaphragm_mm"):
+    plt.errorbar(g["V_V"], g["I_A"], yerr=g["dI_A"], fmt="o-", markersize=3,
+                 label=f"{d:g} mm diaphragm")
+
+plt.xlabel("Voltage $V$ (V)")
+plt.ylabel("Current $I$ (A)")
+plt.legend()
+plt.savefig("assignment2_IV_curves.png", dpi=300, bbox_inches="tight")
+plt.close()
