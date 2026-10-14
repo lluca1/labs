@@ -1,2 +1,2 @@
 # labs
-data processing scripts for labs
+data processing scripts for Lab Skills course
