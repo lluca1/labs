@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # literature constants
-C = scipy_constants.c                 
-E = scipy_constants.e                
-H_LIT = scipy_constants.h               
-H_OVER_E_LIT = H_LIT / E   
+C = scipy_constants.c
+E = scipy_constants.e
+H_LIT = scipy_constants.h
+H_OVER_E_LIT = H_LIT / E
 
 # assigned errors
-D_LAMBDA_NM = 0.1 # from lab manual   
+D_LAMBDA_NM = 0.1 # from lab manual
 D_V_V = 0.001 # from resolution
 D_DIAPHRAGM_MM = 0.1 # from lab manual
 
@@ -25,12 +25,12 @@ mean_V["frequency_Hz"] = C / (mean_V.index * 1e-9)
 lam = mean_V.index.to_numpy() * 1e-9
 mean_V["d_frequency_Hz"] = C * (D_LAMBDA_NM * 1e-9) / lam**2                 # assigned
 mean_V["s_mean_V"] = mean_V["std"] / np.sqrt(mean_V["count"])                # statistical
-mean_V["d_V_total_V"] = np.sqrt(D_V_V**2 + mean_V["s_mean_V"]**2)
+mean_V["d_V_mean_V"] = np.maximum(D_V_V, mean_V["s_mean_V"])                 # larger of assigned and statistical
 
 f = mean_V["frequency_Hz"].to_numpy()
 df = mean_V["d_frequency_Hz"].to_numpy()
 V = abs(mean_V["mean"].to_numpy()) # modulus the stopping voltage
-dV = mean_V["d_V_total_V"].to_numpy()
+dV = mean_V["d_V_mean_V"].to_numpy()
 
 fit = linregress(f, V)
 
